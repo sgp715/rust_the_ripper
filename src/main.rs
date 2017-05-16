@@ -40,4 +40,12 @@ fn main() {
         return
     }
 
+
+   /*   for each hash in hash_file
+    *       for each word in word_list
+    *           let test = result of running md5 hashing algorithm on word
+    *           if test == hash
+    *               return word     // we found the password
+    */
+
 }

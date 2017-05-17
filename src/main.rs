@@ -42,8 +42,8 @@ fn main() {
         wordlist_file.read_to_string(&mut wordlist_string);
 
 
-        let cracked = crack(hashes_string.split('\n').collect(), wordlist_string.split('\n').collect()) {
-        \\ write cracked passwords to file
+        let cracked = crack(hashes_string.split('\n').collect(), wordlist_string.split('\n').collect());
+        // write cracked passwords to file
 
     } else {
         println!("Usage: cargo run <password_hashes> <wordlist>");
@@ -54,19 +54,19 @@ fn main() {
 
 fn crack(wordlist: Vec<&str>, hashes: Vec<&str>) -> Vec<(String, String)> {
 
-    let passwords: Vec<(String, String)> = vec![];
-
-    let generated: Vec<String, String> = vec![];
+    let mut generated: Vec<(String, String)> = vec![];
     for word in wordlist {
         let mut hasher = Blake2b::default();
         hasher.input(word.to_string().as_bytes());
-        generated.push((word.to_string(), hasher.result()));
+        let hash_string = hasher.result().iter().cloned().collect();
+        generated.push((word.to_string(), String::from_utf8(hash_string).expect("Could not create string from bytes")));
     }
 
+    let mut passwords: Vec<(String, String)> = vec![];
     'hash: for hash in hashes {
-        for g in generated {
+        for g in &generated {
             if g.1 == hash {
-                passwords.push((hash.to_string(), g.0));
+                passwords.push((hash.to_string(), g.0.clone()));
                 continue 'hash;
             }
         }

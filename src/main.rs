@@ -57,16 +57,16 @@ fn crack(hash: &String, wordlist: &Vec<String>) -> Option<String> {
 
     for word in wordlist {
         let mut hasher = Blake2b::default();
+        println!("{:?}", hasher);
         hasher.input(word.to_string().as_bytes());
         let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
         let mut compare = String::new();
         for byte in hashed_word {
             compare.push_str(format!("{:x}", byte).as_str());
         }
-
         if *hash.to_lowercase() == compare {
             println!("Found Password: {}, hash: {}", word, &hash);
-            //Some(word)
+            return Some(word.to_string())
         }
     }
 

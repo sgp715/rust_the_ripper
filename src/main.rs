@@ -55,17 +55,21 @@ fn main() {
 fn crack(wordlist: Vec<&str>, hashes: Vec<&str>) -> Vec<(String, String)> {
 
     let passwords: Vec<(String, String)> = vec![];
-    'word: for word in wordlist {
+
+    let generated: Vec<String, String> = vec![];
+    for word in wordlist {
         let mut hasher = Blake2b::default();
         hasher.input(word.to_string().as_bytes());
-        let generated_hash = hasher.result();
-        for hash in hashes {
-            if generated_hash == hash {
-                passwords.push((word.to_string(), hash.to_string()));
-                continue 'word;
+        generated.push((word.to_string(), hasher.result()));
+    }
+
+    'hash: for hash in hashes {
+        for g in generated {
+            if g.1 == hash {
+                passwords.push((hash.to_string(), g.0));
+                continue 'hash;
             }
         }
-        passwords.push((word.to_string(),"-".to_string()));
     }
 
     passwords

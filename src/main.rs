@@ -9,8 +9,7 @@
 
 use std::env;
 use std::fs::File;
-
-use std::io::Read;
+use std::io::{BufRead, BufReader};
 
 extern crate blake2;
 use blake2::{Blake2b, Digest};
@@ -19,7 +18,7 @@ fn main() {
 
     if  env::args().len() == 3 {
 
-        let mut hash_file = match File::open(env::args().nth(1).expect("Could not get hash file name")) {
+        let hash_file = match File::open(env::args().nth(1).expect("Could not get hash file name")) {
             Ok(file) => file,
             Err(e) => {
                 println!("Error opening password hashes: {}", e);
@@ -27,7 +26,7 @@ fn main() {
             }
         };
 
-        let mut wordlist_file = match File::open(env::args().nth(2).expect("Could not get wordlist file name")) {
+        let wordlist_file = match File::open(env::args().nth(2).expect("Could not get wordlist file name")) {
             Ok(file) => file,
             Err(e) => {
                 println!("Error opening wordlist: {}", e);
@@ -35,15 +34,17 @@ fn main() {
             }
         };
 
-        let mut hashes_string = String::new();
-        hash_file.read_to_string(&mut hashes_string);
-
-        let mut wordlist_string = String::new();
-        wordlist_file.read_to_string(&mut wordlist_string);
+        let mut hashes = BufReader::new(hash_file).lines();
+        let wordlist: Vec<String> = BufReader::new(wordlist_file).lines().map(|l| l.expect("Error reading wordlist")).collect();
 
 
-        let cracked = crack(hashes_string.split('\n').collect(), wordlist_string.split('\n').collect());
-        // write cracked passwords to file
+        while let Some(Ok(hash)) = hashes.next() {
+            match crack(&hash, &wordlist) {
+                Some(word) => println!("Found Password: {}, hash: {}", word, &hash),
+                None => println!("Could not crack hash: {}", &hash),
+            }
+        }
+
 
     } else {
         println!("Usage: cargo run <password_hashes> <wordlist>");
@@ -52,26 +53,22 @@ fn main() {
 
 }
 
-fn crack(wordlist: Vec<&str>, hashes: Vec<&str>) -> Vec<(String, String)> {
+fn crack(hash: &String, wordlist: &Vec<String>) -> Option<String> {
 
-    let mut generated: Vec<(String, String)> = vec![];
     for word in wordlist {
         let mut hasher = Blake2b::default();
         hasher.input(word.to_string().as_bytes());
-        let hash_string = hasher.result().iter().cloned().collect();
-        generated.push((word.to_string(), String::from_utf8(hash_string).expect("Could not create string from bytes")));
-    }
+        let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
+        let mut compare = String::new();
+        for byte in hashed_word {
+            compare.push_str(format!("{:x}", byte).as_str());
+        }
 
-    let mut passwords: Vec<(String, String)> = vec![];
-    'hash: for hash in hashes {
-        for g in &generated {
-            if g.1 == hash {
-                passwords.push((hash.to_string(), g.0.clone()));
-                continue 'hash;
-            }
+        if *hash.to_lowercase() == compare {
+            println!("Found Password: {}, hash: {}", word, &hash);
+            //Some(word)
         }
     }
 
-    passwords
-
+    None
 }

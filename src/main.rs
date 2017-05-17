@@ -62,7 +62,7 @@ fn crack(wordlist: Vec<&str>, hashes: Vec<&str>) -> Vec<(String, String)> {
         for hash in hashes {
             if generated_hash == hash {
                 passwords.push((word.to_string(), hash.to_string()));
-                break 'word;
+                continue 'word;
             }
         }
         passwords.push((word.to_string(),"-".to_string()));

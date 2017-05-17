@@ -57,7 +57,6 @@ fn crack(hash: &String, wordlist: &Vec<String>) -> Option<String> {
 
     for word in wordlist {
         let mut hasher = Blake2b::default();
-        println!("{:?}", hasher);
         hasher.input(word.to_string().as_bytes());
         let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
         let mut compare = String::new();

@@ -54,9 +54,9 @@ fn main() {
 }
 
 fn crack(wordlist: Vec<&str>, hashes: Vec<&str>) -> Vec<String> {
+
     let passwords = vec![];
     for word in wordlist {
-
         let mut hasher = Blake2b::default();
         hasher.input(word.to_string().as_bytes());
         let generated_hash = hasher.result();
@@ -69,4 +69,5 @@ fn crack(wordlist: Vec<&str>, hashes: Vec<&str>) -> Vec<String> {
     }
 
     passwords
+    
 }

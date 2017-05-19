@@ -44,8 +44,8 @@ fn main() {
     
     while let Some(Ok(hash)) = hashes.next() {
         match crack(&hash, &wordlist) {
-            Some(word) => println!("Found Password: {}, hash:{}", word, &hash),
-            None => println!("Could not crack hash: {}", &hash),
+            Some(word) => println!("Successfully Cracked:\n\tpassword: {}\n\thash: {}\n", word, &hash),
+            None => println!("Could not crack hash: {}\n", &hash),
         }
     }
 }
@@ -61,7 +61,6 @@ fn crack(hash: &String, wordlist: &Vec<String>) -> Option<String> {
             compare.push_str(format!("{:x}", byte).as_str());
         }
         if *hash.to_lowercase() == compare {
-            println!("Found Password: {}, hash: {}", word, &hash);
             return Some(word.to_string())
         }
     }

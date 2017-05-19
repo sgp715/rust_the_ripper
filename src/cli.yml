@@ -1,0 +1,17 @@
+name: ripper
+version: "1.0"
+author: Nikhil C., Sebastian P., Michael G.
+about: A rust password cracker, similar to John the Ripper
+args:
+    - HASHES:
+        short: h
+        long: hashes
+        help: File containing hashes to crack
+        takes_value: true
+        required: true
+    - WORDLIST:
+        short: w
+        long: wordlist
+        help: File containing list of words to test 
+        takes_value: true
+        required: true

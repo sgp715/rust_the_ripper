@@ -7,50 +7,47 @@
  *
  */
 
-use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 extern crate blake2;
 use blake2::{Blake2b, Digest};
 
+#[macro_use]
+extern crate clap;
+use clap::App;
+
 fn main() {
 
-    if  env::args().len() == 3 {
+    let yaml = load_yaml!("cli.yml");
+    let matches = App::from_yaml(yaml).get_matches();
 
-        let hash_file = match File::open(env::args().nth(1).expect("Could not get hash file name")) {
-            Ok(file) => file,
-            Err(e) => {
-                println!("Error opening password hashes: {}", e);
-                return
-            }
-        };
+    let hash_file = match File::open(matches.value_of("HASHES").unwrap()) {
+        Ok(file) => file,
+        Err(e) => {
+            println!("Error opening password hashes: {}", e);
+            return
+        },
+    };
 
-        let wordlist_file = match File::open(env::args().nth(2).expect("Could not get wordlist file name")) {
-            Ok(file) => file,
-            Err(e) => {
-                println!("Error opening wordlist: {}", e);
-                return
-            }
-        };
+    let wordlist_file = match File::open(matches.value_of("WORDLIST").unwrap()) {
+        Ok(file) => file,
+        Err(e) => {
+            println!("Error opening wordlist: {}", e);
+            return
+        },
+    };
 
-        let mut hashes = BufReader::new(hash_file).lines();
-        let wordlist: Vec<String> = BufReader::new(wordlist_file).lines().map(|l| l.expect("Error reading wordlist")).collect();
-
-
-        while let Some(Ok(hash)) = hashes.next() {
-            match crack(&hash, &wordlist) {
-                Some(word) => println!("Found Password: {}, hash: {}", word, &hash),
-                None => println!("Could not crack hash: {}", &hash),
-            }
+    let mut hashes = BufReader::new(hash_file).lines();
+    let wordlist: Vec<String> = BufReader::new(wordlist_file).lines()
+                                .map(|l| l.expect("Error reading wordlist")).collect();
+    
+    while let Some(Ok(hash)) = hashes.next() {
+        match crack(&hash, &wordlist) {
+            Some(word) => println!("Found Password: {}, hash:{}", word, &hash),
+            None => println!("Could not crack hash: {}", &hash),
         }
-
-
-    } else {
-        println!("Usage: cargo run <password_hashes> <wordlist>");
-        return
     }
-
 }
 
 fn crack(hash: &String, wordlist: &Vec<String>) -> Option<String> {

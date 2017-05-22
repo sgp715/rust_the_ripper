@@ -7,15 +7,14 @@
  *
  */
 
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-
-extern crate blake2;
-use blake2::{Blake2b, Digest};
 
 #[macro_use]
 extern crate clap;
 use clap::App;
+extern crate blake2;
+mod cracker;
+use cracker::Cracker;
+use std::fs::File;
 
 fn main() {
 
@@ -38,32 +37,6 @@ fn main() {
         },
     };
 
-    let mut hashes = BufReader::new(hash_file).lines();
-    let wordlist: Vec<String> = BufReader::new(wordlist_file).lines()
-                                .map(|l| l.expect("Error reading wordlist")).collect();
-    
-    while let Some(Ok(hash)) = hashes.next() {
-        match crack(&hash, &wordlist) {
-            Some(word) => println!("Successfully Cracked:\n\tpassword: {}\n\thash: {}\n", word, &hash),
-            None => println!("Could not crack hash: {}\n", &hash),
-        }
-    }
-}
-
-fn crack(hash: &String, wordlist: &Vec<String>) -> Option<String> {
-
-    for word in wordlist {
-        let mut hasher = Blake2b::default();
-        hasher.input(word.to_string().as_bytes());
-        let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
-        let mut compare = String::new();
-        for byte in hashed_word {
-            compare.push_str(format!("{:x}", byte).as_str());
-        }
-        if *hash.to_lowercase() == compare {
-            return Some(word.to_string())
-        }
-    }
-
-    None
+    let cracker = Cracker::new(hash_file, wordlist_file);
+    cracker.run();
 }

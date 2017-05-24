@@ -19,7 +19,7 @@ impl Cracker {
         }
     }
 
-    pub fn run(&self) {
+    pub fn run(&self, number_threads: usize) {
         let h_file_clone = match self.hash_file.try_clone() {
             Ok(clone) => clone,
             _ => panic!("Error"),
@@ -34,53 +34,59 @@ impl Cracker {
                                     .map(|l| l.expect("Error reading wordlist")).collect();
 
         while let Some(Ok(hash)) = hashes.next() {
-            match self.crack(hash.clone(), wordlist.clone()) {
+            match self.crack(hash.clone(), wordlist.clone(), number_threads) {
                 Some(word) => println!("Successfully Cracked:\n\tpassword: {}\n\thash: {}\n", word, &hash),
                 None => println!("Could not crack hash: {}\n", &hash),
             }
         }
     }
 
-    fn crack(&self, hash: String, wordlist: Vec<String>) -> Option<String> {
+    fn crack(&self, hash: String, wordlist: Vec<String>, number_threads: usize) -> Option<String> {
 
-        let len = wordlist.len();
+        let number_words = wordlist.len();
         let wordlist_data = Arc::new(Mutex::new(wordlist));
         let hash_data = Arc::new(hash);
-        let mut children = vec![];
-        // println!("hash: {}", *hash);
-        for i in 0..len {
-            let wordlist_data = wordlist_data.clone();
-            let hash_data = hash_data.clone();
-            children.push(
-                thread::spawn(move || {
-                    let mut hasher = Blake2b::default();
-                    let ref mut word = wordlist_data.lock().unwrap()[i];
-                    hasher.input(word.to_string().as_bytes());
-                    let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
-                    let mut compare = String::new();
-                    for byte in hashed_word {
-                        compare.push_str(format!("{:x}", byte).as_str());
-                    }
-                    // println!("hash data: {}", hash_data);
-                    // println!("compare: {}", compare);
-                    if hash_data.to_lowercase() == compare {
-                        Some(word.to_string())
-                    } else {
-                        None
-                    }
-                })
-            );
-        }
-
-        for child in children {
-            match child.join() {
-                Ok(option) => {
-                    if option.is_some() {
-                        return option;
-                    }
-                },
-                _ => ()
+        let number_threads = 10;
+        let mut threads = vec![number_threads; (number_words / number_threads)];
+        threads.push(number_words % number_threads);
+        let mut base = 0;
+        for t in threads {
+            let mut children = vec![];
+            for i in base..(base + t) {
+                let wordlist_data = wordlist_data.clone();
+                let hash_data = hash_data.clone();
+                children.push(
+                    thread::spawn(move || {
+                        let mut hasher = Blake2b::default();
+                        let ref mut word = wordlist_data.lock().unwrap()[i];
+                        hasher.input(word.to_string().as_bytes());
+                        let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
+                        let mut compare = String::new();
+                        for byte in hashed_word {
+                            compare.push_str(format!("{:x}", byte).as_str());
+                        }
+                        if hash_data.to_lowercase() == compare {
+                            Some(word.to_string())
+                        } else {
+                            None
+                        }
+                    })
+                );
             }
+
+            for child in children {
+                match child.join() {
+                    Ok(option) => {
+                        if option.is_some() {
+                            return option;
+                        }
+                    },
+                    _ => ()
+                }
+            }
+
+            base = base + t;
+
         }
 
         None

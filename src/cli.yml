@@ -12,6 +12,12 @@ args:
     - WORDLIST:
         short: w
         long: wordlist
-        help: File containing list of words to test 
+        help: File containing list of words to test
         takes_value: true
         required: true
+    - THREADS:
+        short: t
+        long: threads
+        help: number of threads to run
+        takes_value: true
+        required: false

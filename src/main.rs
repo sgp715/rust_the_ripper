@@ -37,6 +37,13 @@ fn main() {
         },
     };
 
+    let number_threads = match matches.value_of("THREADS") {
+        Some(num) => {
+            num.parse::<usize>().unwrap()
+        },
+        _ => 10
+    };
+
     let cracker = Cracker::new(hash_file, wordlist_file);
-    cracker.run();
+    cracker.run(number_threads);
 }

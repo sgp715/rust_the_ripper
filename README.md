@@ -17,5 +17,5 @@ $ ./ripper --hashes hashes.txt --wordlist wordlist.txt
 ```
 * Optionally, you can specify the number of threads that you would like to run on (the default is 10)
 ```
-$  ./ripper --hashes hashes.txt --wordlist wordlist.txt -t 20
+$  ./ripper --hashes hashes.txt --wordlist wordlist.txt --threads 20
 ```

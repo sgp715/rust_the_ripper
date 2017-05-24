@@ -48,7 +48,6 @@ impl Cracker {
         let number_words = wordlist.len();
         let wordlist_data = Arc::new(Mutex::new(wordlist));
         let hash_data = Arc::new(hash);
-        let number_threads = 10;
         let mut threads = vec![number_threads; (number_words / number_threads)];
         threads.push(number_words % number_threads);
         let mut base = 0;

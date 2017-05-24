@@ -3,6 +3,9 @@
 ## Description
 John the Ripper is a staple of any good hacker's tool set. It allows you to  quickly and easily tackle different password hashes from a variety of angles. We have attempted to create a CLI with functionality similar to that of John the Ripper using the Rust programming language. The implementation takes advantage of Rust's ability to safely use concurrency to quickly attempt to crack some pa$$w0rds.
 
+## [TODOS](https://docs.google.com/a/u.northwestern.edu/document/d/1GiCuUi17eBSVrJ-CwFJi6_JRyVOQCF5WnB72vBVG3Us/edit?usp=sharing)
+
+
 ## Install
 * Install rust
 ```

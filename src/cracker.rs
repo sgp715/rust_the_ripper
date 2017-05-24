@@ -3,8 +3,10 @@ use std::io::{BufRead, BufReader};
 use std::thread;
 use std::sync::{Arc, Mutex};
 
+
 extern crate blake2;
 use blake2::{Blake2b, Digest};
+
 
 pub struct Cracker {
     hash_file: File,

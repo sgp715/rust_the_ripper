@@ -16,6 +16,8 @@ mod cracker;
 use cracker::Cracker;
 use std::fs::File;
 
+mod transformations;
+
 fn main() {
 
     let yaml = load_yaml!("cli.yml");

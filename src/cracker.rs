@@ -1,5 +1,7 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::thread;
+use std::sync::{Arc, Mutex};
 
 extern crate blake2;
 use blake2::{Blake2b, Digest};
@@ -32,25 +34,52 @@ impl Cracker {
                                     .map(|l| l.expect("Error reading wordlist")).collect();
 
         while let Some(Ok(hash)) = hashes.next() {
-            match self.crack(&hash, &wordlist) {
+            match self.crack(hash.clone(), wordlist.clone()) {
                 Some(word) => println!("Successfully Cracked:\n\tpassword: {}\n\thash: {}\n", word, &hash),
                 None => println!("Could not crack hash: {}\n", &hash),
             }
         }
     }
 
-    fn crack(&self, hash: &String, wordlist: &Vec<String>) -> Option<String> {
+    fn crack(&self, hash: String, wordlist: Vec<String>) -> Option<String> {
 
-        for word in wordlist {
-            let mut hasher = Blake2b::default();
-            hasher.input(word.to_string().as_bytes());
-            let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
-            let mut compare = String::new();
-            for byte in hashed_word {
-                compare.push_str(format!("{:x}", byte).as_str());
-            }
-            if *hash.to_lowercase() == compare {
-                return Some(word.to_string())
+        let len = wordlist.len();
+        let wordlist_data = Arc::new(Mutex::new(wordlist));
+        let hash_data = Arc::new(hash);
+        let mut children = vec![];
+        // println!("hash: {}", *hash);
+        for i in 0..len {
+            let wordlist_data = wordlist_data.clone();
+            let hash_data = hash_data.clone();
+            children.push(
+                thread::spawn(move || {
+                    let mut hasher = Blake2b::default();
+                    let ref mut word = wordlist_data.lock().unwrap()[i];
+                    hasher.input(word.to_string().as_bytes());
+                    let hashed_word: Vec<u8> = hasher.result().iter().cloned().collect();
+                    let mut compare = String::new();
+                    for byte in hashed_word {
+                        compare.push_str(format!("{:x}", byte).as_str());
+                    }
+                    // println!("hash data: {}", hash_data);
+                    // println!("compare: {}", compare);
+                    if hash_data.to_lowercase() == compare {
+                        Some(word.to_string())
+                    } else {
+                        None
+                    }
+                })
+            );
+        }
+
+        for child in children {
+            match child.join() {
+                Ok(option) => {
+                    if option.is_some() {
+                        return option;
+                    }
+                },
+                _ => ()
             }
         }
 

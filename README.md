@@ -22,3 +22,5 @@ $ ./ripper --hashes hashes.txt --wordlist wordlist.txt
 ```
 $  ./ripper --hashes hashes.txt --wordlist wordlist.txt --threads 20
 ```
+## Rules and Mangling
+You can modify that mangle function in main.rs to include any mangling rules you need implemented. As an example and by default it will run brute force generating all possible strings of length at most 6 if a blank line is present in the wordlist file. Additionally it will run the append_numbers mangle to any other words in the wordlist adding numbers 0-9999 to the end of the words.

@@ -83,13 +83,32 @@ fn main() {
         },
     };
 
-    let wordlist_file = match File::open(matches.value_of("WORDLIST").unwrap()) {
-        Ok(file) => file,
-        Err(e) => {
-            println!("Error opening wordlist: {}", e);
-            return
-        },
-    };
+    let hashes_vec: Vec<String> = BufReader::new(hash_file).lines()
+                            .map(|l| l.expect("Error reading hashlist")).collect();
+
+    // let wordlist_file = match File::open(matches.value_of("WORDLIST").unwrap()) {
+    //     Ok(file) => file,
+    //     Err(e) => {
+    //         println!("Error opening wordlist: {}", e);
+    //         return
+    //     },
+    // };
+
+    let mut wordlist_vec = vec![];
+    let wordlist_option = matches.value_of("WORDLIST");
+    if wordlist_option.is_some() {
+        let wordlist_file = match File::open(wordlist_option.unwrap()) {
+            Ok(file) => file,
+            Err(e) => {
+                println!("Error opening wordlist: {}", e);
+                return
+            },
+        };
+        let wordlist_vec: Vec<String> = BufReader::new(wordlist_file).lines()
+                                    .map(|l| l.expect("Error reading wordlist")).collect();
+    } else {
+        wordlist_vec.push("".to_string());
+    }
 
     let number_threads = match matches.value_of("THREADS") {
         Some(num) => {
@@ -97,20 +116,6 @@ fn main() {
         },
         _ => num_cpus::get()
     };
-
-    let h_file_clone = match hash_file.try_clone() {
-        Ok(clone) => clone,
-        _ => panic!("Error"),
-    };
-    let w_file_clone = match wordlist_file.try_clone() {
-        Ok(clone) => clone,
-        _ => panic!("Error"),
-    };
-
-    let hashes_vec: Vec<String> = BufReader::new(h_file_clone).lines()
-                            .map(|l| l.expect("Error reading hashlist")).collect();
-    let wordlist_vec: Vec<String> = BufReader::new(w_file_clone).lines()
-                                .map(|l| l.expect("Error reading wordlist")).collect();
 
     let cracker = Cracker::new(hashes_vec, wordlist_vec, "password.pot".to_string());
     cracker.crack(number_threads, mangle);

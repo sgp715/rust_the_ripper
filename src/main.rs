@@ -16,6 +16,8 @@ extern crate cracker;
 use cracker::Cracker;
 use std::fs::File;
 
+use std::io::{BufRead, BufReader};
+
 extern crate num_cpus;
 
 pub fn mangle(word: String)->Vec<String>{
@@ -96,6 +98,21 @@ fn main() {
         _ => num_cpus::get()
     };
 
-    let cracker = Cracker::new(hash_file, wordlist_file, "password.pot".to_string());
-    cracker.run(number_threads, mangle);
+    let h_file_clone = match hash_file.try_clone() {
+        Ok(clone) => clone,
+        _ => panic!("Error"),
+    };
+    let w_file_clone = match wordlist_file.try_clone() {
+        Ok(clone) => clone,
+        _ => panic!("Error"),
+    };
+
+    let hashes_vec: Vec<String> = BufReader::new(h_file_clone).lines()
+                            .map(|l| l.expect("Error reading hashlist")).collect();
+    let wordlist_vec: Vec<String> = BufReader::new(w_file_clone).lines()
+                                .map(|l| l.expect("Error reading wordlist")).collect();
+
+    let cracker = Cracker::new(hashes_vec, wordlist_vec, "password.pot".to_string());
+    cracker.crack(number_threads, mangle);
+
 }

@@ -16,6 +16,8 @@ extern crate cracker;
 use cracker::Cracker;
 use std::fs::File;
 
+extern crate num_cpus;
+
 fn main() {
 
     let yaml = load_yaml!("cli.yml");
@@ -41,7 +43,7 @@ fn main() {
         Some(num) => {
             num.parse::<usize>().unwrap()
         },
-        _ => 10
+        _ => num_cpus::get()
     };
 
     let cracker = Cracker::new(hash_file, wordlist_file);

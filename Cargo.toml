@@ -6,3 +6,4 @@ authors = ["nikhil"]
 [dependencies]
 blake2 = "0.5"
 clap = {version = "~2.19.0", features = ["yaml"]}
+cracker = { git = "https://github.com/sgp715/Cracker.git" }

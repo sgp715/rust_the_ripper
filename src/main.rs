@@ -12,11 +12,9 @@
 extern crate clap;
 use clap::App;
 extern crate blake2;
-mod cracker;
+extern crate cracker;
 use cracker::Cracker;
 use std::fs::File;
-
-mod transformations;
 
 fn main() {
 

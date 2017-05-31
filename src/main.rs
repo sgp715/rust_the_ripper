@@ -18,6 +18,10 @@ use std::fs::File;
 
 extern crate num_cpus;
 
+fn dumby_mangler(word: String) -> Vec<String> {
+    vec![word]
+}
+
 fn main() {
 
     let yaml = load_yaml!("cli.yml");
@@ -46,6 +50,6 @@ fn main() {
         _ => num_cpus::get()
     };
 
-    let cracker = Cracker::new(hash_file, wordlist_file);
-    cracker.run(number_threads);
+    let cracker = Cracker::new(hash_file, wordlist_file, "password.pot".to_string());
+    cracker.run(number_threads, dumby_mangler);
 }

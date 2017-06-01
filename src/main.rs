@@ -165,6 +165,6 @@ fn main() {
     };
 
     let cracker = Cracker::new(hashes_vec, wordlist_vec, "password.pot".to_string());
-    cracker.crack(number_threads, dumby_mangler);
+    cracker.crack(number_threads, letter_replace);
 
 }

@@ -106,7 +106,7 @@ pub fn brute_force()->Vec<String>{
                 for i2 in &chars2{
                     for i1 in &chars1{
                         for i0 in &chars0{
-                            let mut temp = format!("{}{}{}{}{}{}",i0,i1,i2,i3,i4,i5);
+                            let temp = format!("{}{}{}{}{}{}",i0,i1,i2,i3,i4,i5);
                             appended.push(temp);
                         }
                     }

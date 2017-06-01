@@ -23,6 +23,7 @@ extern crate num_cpus;
 mod mangle;
 use mangle::letter_replace;
 
+
 fn main() {
 
     let yaml = load_yaml!("cli.yml");

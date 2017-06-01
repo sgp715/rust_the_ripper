@@ -45,6 +45,10 @@ pub fn append_number(word: String)->Vec<String>{
     appended
 }
 
+pub fn dumby_mangler(word: String) -> Vec<String> {
+    vec![word]
+}
+
 pub fn letter_replace(word: String)->Vec<String>{
     let mut replaced = HashSet::new();
     replaced.insert(word);
@@ -147,7 +151,7 @@ fn main() {
                 return
             },
         };
-        let wordlist_vec: Vec<String> = BufReader::new(wordlist_file).lines()
+        wordlist_vec = BufReader::new(wordlist_file).lines()
                                     .map(|l| l.expect("Error reading wordlist")).collect();
     } else {
         wordlist_vec.push("".to_string());
@@ -161,6 +165,6 @@ fn main() {
     };
 
     let cracker = Cracker::new(hashes_vec, wordlist_vec, "password.pot".to_string());
-    cracker.crack(number_threads, mangle);
+    cracker.crack(number_threads, dumby_mangler);
 
 }

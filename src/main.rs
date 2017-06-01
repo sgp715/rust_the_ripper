@@ -15,6 +15,7 @@ extern crate blake2;
 extern crate cracker;
 use cracker::Cracker;
 use std::fs::File;
+use std::collections::HashSet;
 
 use std::io::{BufRead, BufReader};
 
@@ -42,6 +43,48 @@ pub fn append_number(word: String)->Vec<String>{
         appended.push(test);
     }
     appended
+}
+
+pub fn letter_replace(word: String)->Vec<String>{
+    let mut replaced = HashSet::new();
+    replaced.insert(word);
+
+    for w in replaced.clone() {
+        replaced.insert(w.replace("i", "1"));
+    }
+    for w in replaced.clone() {
+        replaced.insert(w.replace("e", "3"));
+    }
+    for w in replaced.clone() {
+        replaced.insert(w.replace("o", "0"));
+    }
+    for w in replaced.clone() {
+        replaced.insert(w.replace("b", "8"));
+    }
+    for w in replaced.clone() {
+        replaced.insert(w.replace("s", "$"));
+    }
+    for w in replaced.clone() {
+        replaced.insert(w.replace("a", "4"));
+    }
+    for w in replaced.clone() {
+        replaced.insert(w.replace("z", "2"));
+    }
+
+    let result: Vec<String> = replaced.iter().map(|s| s.to_owned()).collect();
+    result
+}
+
+#[test]
+fn letter_replace_test() {
+    let word = "letmein".to_string();
+    let expected = vec!["letmein".to_string(),
+                        "letme1n".to_string(),
+                        "l3tm3in".to_string(),
+                        "l3tm31n".to_string()];
+    let mut actual = letter_replace(word);
+    actual.sort_by(|a, b| b.cmp(a));
+    assert_eq!(actual, expected);
 }
 
 pub fn brute_force()->Vec<String>{
